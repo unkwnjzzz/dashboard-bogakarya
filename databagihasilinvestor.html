@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>BOGAKARYA 86 | Investor Transparency Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #000000; --card: #0a0a0a; --border: #1a1a1a; 
+            --text-main: #ffffff; --text-dim: #71717a;
+            --accent: #10b981; --blue: #3b82f6; --amber: #f59e0b; --hot: #ef4444;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Stats Grid */
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; }
+        .label { font-size: 9px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        .value { display: block; font-size: 18px; font-weight: 800; margin-top: 8px; }
+
+        /* Hot Product & Health Bar */
+        .top-info { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .hot-card { background: linear-gradient(90deg, #111, #2b0000); border: 1px solid #450a0a; padding: 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; }
+        
+        /* Progress Modal */
+        .modal-section { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .progress-bar-bg { background: #111; height: 10px; border-radius: 10px; margin: 12px 0; overflow: hidden; border: 1px solid #222; }
+        .progress-fill { background: linear-gradient(90deg, var(--blue), var(--accent)); height: 100%; width: 0%; transition: 2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Table Section */
+        .table-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; margin-top: 25px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #050505; padding: 15px; text-align: left; color: var(--text-dim); border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+        tr:hover { background: #0f0f0f; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; }
+        .ready { background: var(--accent); color: #000; }
+        .waiting { border: 1px solid var(--amber); color: var(--amber); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 style="margin:0; font-size: 24px; font-weight: 900; letter-spacing: -1.5px;">BOGAKARYA <span style="color:var(--blue)">86</span></h1>
+            <p style="color:var(--text-dim); font-size: 11px; margin: 5px 0 0 0;">INTEGRATED INVESTOR DASHBOARD V2.0</p>
+        </div>
+        <div id="sync-status" style="font-size:10px; background: #111; padding: 5px 12px; border-radius: 20px; color: var(--accent); border: 1px solid #222;">● LIVE SYNC ACTIVE</div>
+    </div>
+
+    <div class="top-info">
+        <div class="hot-card" id="hot-product-box">
+            <div>
+                <span style="background:var(--hot); color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:900;">BEST SELLER 🔥</span>
+                <div id="hot-product-name" style="font-weight:800; font-size:18px; margin-top:5px;">-</div>
+            </div>
+            <div style="text-align:right">
+                <div id="hot-product-count" style="font-size:24px; font-weight:900; color:var(--hot)">0</div>
+                <div style="font-size:10px; color:var(--text-dim)">UNIT TERJUAL</div>
+            </div>
+        </div>
+        <div class="modal-section">
+            <div style="display:flex; justify-content:space-between;"><span class="label">Payback Progress (Modal 15jt)</span><span id="p-percent" style="font-weight:800; color:var(--accent)">0%</span></div>
+            <div class="progress-bar-bg"><div id="modal-fill" class="progress-fill"></div></div>
+            <div style="display:flex; justify-content:space-between; font-size:11px;"><span id="v-collected" style="font-weight:700">Rp 0</span><span style="color:var(--text-dim)">Target 15jt</span></div>
+        </div>
+    </div>
+
+    <div class="grid-stats">
+        <div class="card"><span class="label">Total Volume (QTY)</span><span id="t-qty" class="value">0</span></div>
+        <div class="card"><span class="label">Settlement Real</span><span id="t-settle" class="value">Rp 0</span></div>
+        <div class="card"><span class="label">Total Laba Bersih</span><span id="t-laba" class="value">Rp 0</span></div>
+        <div class="card" style="border-bottom: 3px solid var(--blue);"><span class="label">Avg Profit / Unit</span><span id="t-avg" class="value">Rp 0</span></div>
+        <div class="card" style="border-bottom: 3px solid var(--accent);"><span class="label">Siap Transfer (READY)</span><span id="t-ready" class="value" style="color:var(--accent)">Rp 0</span></div>
+    </div>
+
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>TANGGAL</th>
+                    <th>PRODUK</th>
+                    <th style="text-align:center">QTY</th>
+                    <th>SETTLEMENT</th>
+                    <th>HPP (TOTAL)</th>
+                    <th>LABA BERSIH</th>
+                    <th>INV (20%)</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRUlmdWZCdKuY9KH_hH-nQ1EEY1cN7ifDf2s1XQtr5BnAJCqwZQH8aFHmn9P-1iuO8Gk_awxyzBmXVS/pub?gid=2041240165&single=true&output=csv";
+    const MODAL_INVESTOR = 15000000;
+
+    function formatRp(v) { return "Rp " + Math.round(v).toLocaleString('id-ID'); }
+
+    Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        complete: function(res) {
+            let data = res.data;
+            let totalSettle = 0, totalLaba = 0, readyInv = 0, totalQty = 0;
+            let productCounts = {};
+            let html = '';
+            let no = 1;
+
+            data.forEach(row => {
+                if(!row["ID PESANAN"]) return;
+
+                let settle = parseFloat(row["SETTLEMENT"]) || 0;
+                let hpp = parseFloat(row["HPP (MODAL)"]) || 0;
+                let laba = parseFloat(row["LABA BERSIH"]) || 0;
+                let inv = parseFloat(row["JATAH INV (20%)"]) || 0;
+                let status = (row["STATUS"] || "WAITING").toUpperCase();
+                let pName = row["NAMA PRODUK"];
+                // Tambahan: QTY biasanya 1 per baris di TikTok Onhold, tapi kita hitung per baris
+                let qty = 1; 
+
+                productCounts[pName] = (productCounts[pName] || 0) + qty;
+                totalQty += qty;
+                totalSettle += settle;
+                totalLaba += laba;
+                if(status === "READY") readyInv += inv;
+
+                html += `<tr>
+                    <td style="color:var(--text-dim)">${no++}</td>
+                    <td style="color:var(--text-dim)">${row["TANGGAL"]}</td>
+                    <td style="font-weight:600">${pName}</td>
+                    <td style="text-align:center; font-weight:800; color:var(--blue)">${qty}</td>
+                    <td>${formatRp(settle)}</td>
+                    <td>${formatRp(hpp)}</td>
+                    <td style="color:var(--accent); font-weight:700">${formatRp(laba)}</td>
+                    <td style="color:var(--blue); font-weight:700">${formatRp(inv)}</td>
+                    <td><span class="badge ${status === 'READY' ? 'ready' : 'waiting'}">${status}</span></td>
+                </tr>`;
+            });
+
+            document.getElementById('table-body').innerHTML = html;
+            document.getElementById('t-qty').innerText = totalQty;
+            document.getElementById('t-settle').innerText = formatRp(totalSettle);
+            document.getElementById('t-laba').innerText = formatRp(totalLaba);
+            document.getElementById('t-ready').innerText = formatRp(readyInv);
+            document.getElementById('t-avg').innerText = formatRp(totalLaba / totalQty);
+            
+            let percent = (totalLaba / MODAL_INVESTOR) * 100;
+            document.getElementById('modal-fill').style.width = Math.min(percent, 100) + "%";
+            document.getElementById('p-percent').innerText = Math.round(percent) + "%";
+            document.getElementById('v-collected').innerText = formatRp(totalLaba);
+
+            let hotItem = Object.keys(productCounts).reduce((a, b) => productCounts[a] > productCounts[b] ? a : b);
+            if(hotItem) {
+                document.getElementById('hot-product-name').innerText = hotItem;
+                document.getElementById('hot-product-count').innerText = productCounts[hotItem];
+            }
+        }
+    });
+</script>
+</body>
+</html>

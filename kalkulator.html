@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Calculator - Boga Karya86</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 p-6">
+
+<div class="max-w-2xl mx-auto bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
+    <h1 class="text-2xl font-bold text-yellow-500 mb-6 text-center uppercase tracking-wider">Kalkulator Cuan Boga Karya</h1>
+    
+    <div class="space-y-4">
+        <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase">Pilih Produk:</label>
+            <select id="produk" onchange="hitung()" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-lg mt-1 text-sm"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase">Admin TikTok (%):</label>
+                <input type="number" id="admin" value="26" oninput="hitung()" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-lg mt-1 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase">Target Margin (%):</label>
+                <input type="number" id="margin" value="20" oninput="hitung()" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-lg mt-1 text-sm">
+            </div>
+        </div>
+
+        <div class="mt-6 bg-slate-950 p-4 rounded-lg border border-slate-800">
+            <p class="text-slate-400 text-xs">HPP Real: <span id="out-hpp" class="text-white font-bold">0</span></p>
+            <div class="mt-2 pt-2 border-t border-slate-800">
+                <p class="text-yellow-500 font-bold text-lg">HARGA JUAL: <span id="out-harga">Rp 0</span></p>
+                <p class="text-emerald-400 text-xs mt-1 font-semibold">Estimasi Cuan per unit: <span id="out-cuan">Rp 0</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DB = {
+        "ROCKET STOVE 30 SINGLE RANGKA": 130324,
+        "ROCKET STOVE 35 SINGLE RANGKA": 138736,
+        "ROCKET STOVE 40 SINGLE RANGKA": 150238,
+        "ROCKET STOVE 35 DOUBLE RANGKA": 169867,
+        "ROCKET STOVE 40 DOUBLE RANGKA": 203521,
+        "ROCKET STOVE 55 DOUBLE RANGKA": 230861,
+        "VARIAN PORTABLE": 116424,
+        "KOMPOR OLI 50 SINGLE": 101185,
+        "KOMPOR OLI 50 RANGKA": 115808,
+        "KAKI MEJA": 125816
+    };
+
+    const select = document.getElementById('produk');
+    Object.keys(DB).forEach(key => {
+        let opt = document.createElement('option');
+        opt.value = key; opt.innerHTML = key;
+        select.appendChild(opt);
+    });
+
+    function hitung() {
+        const nama = select.value;
+        const hpp = DB[nama];
+        const admin = parseFloat(document.getElementById('admin').value) / 100;
+        const margin = parseFloat(document.getElementById('margin').value) / 100;
+        
+        // Rumus: HPP / (1 - Margin - Admin)
+        const hargaJual = hpp / (1 - margin - admin);
+        const cuan = hargaJual * margin;
+        
+        document.getElementById('out-hpp').innerText = "Rp " + hpp.toLocaleString('id-ID');
+        document.getElementById('out-harga').innerText = "Rp " + Math.round(hargaJual).toLocaleString('id-ID');
+        document.getElementById('out-cuan').innerText = "Rp " + Math.round(cuan).toLocaleString('id-ID');
+    }
+
+    hitung();
+</script>
+</body>
+</html>
